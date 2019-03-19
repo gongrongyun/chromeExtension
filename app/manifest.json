@@ -1,0 +1,35 @@
+{
+    "manifest_version": 2,
+    "name": "reptile",
+    "version": "1.0",
+    "description": "use this to get infos you want",
+    "icons": 
+    {
+        "16": "imgs/logo_v2_qkteam.png"
+    },
+    "permissions":
+    [
+        "tabs",
+        "storage",
+        "webRequest"
+    ],
+    "content_scripts":
+    [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["js/contentScript.js"],
+            "run_at": "document_start"
+        }
+    ],
+    "options_page": "html/options.html",
+    "options_ui": 
+    {
+        "page": "html/options.html",
+        "chrome_style": true
+    },
+    "browser_action":
+    {
+        "default_popup": "html/popup.html",
+        "default_title": "开始你的爬虫之旅吧"
+    }
+}
