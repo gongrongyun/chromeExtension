@@ -5,31 +5,38 @@
     "description": "use this to get infos you want",
     "icons": 
     {
-        "16": "imgs/logo_v2_qkteam.png"
+        "16": "app/images/logo_v2_qkteam.png"
+    },
+    "background":
+    {
+        "scripts": ["app/js/background.js"]
     },
     "permissions":
     [
         "tabs",
         "storage",
-        "webRequest"
+        "webRequest",
+        "notifications"
     ],
     "content_scripts":
     [
         {
             "matches": ["<all_urls>"],
-            "js": ["js/contentScript.js"],
+            "js": ["app/js/contentScript.js"],
+            "css": ["app/css/injectWindow.css"],
             "run_at": "document_start"
         }
     ],
-    "options_page": "html/options.html",
+    "options_page": "app/html/options.html",
     "options_ui": 
     {
-        "page": "html/options.html",
+        "page": "app/html/options.html",
         "chrome_style": true
     },
     "browser_action":
     {
-        "default_popup": "html/popup.html",
+        "default_icon": "app/images/logo_v2_qkteam.png",
+        "default_popup": "app/html/popup.html",
         "default_title": "开始你的爬虫之旅吧"
     }
 }
