@@ -35,3 +35,13 @@ function end() {
         });
     }
 }
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    //将数据发往后端
+    chrome.notifications.create(null, {
+        type: 'basic',
+        iconUrl: 'app/images/logo_v2_qkteam.png',
+        title: '温馨提示',
+        message: '已经开始为您爬取数据'
+    });
+})

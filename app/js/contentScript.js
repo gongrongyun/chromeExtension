@@ -5,11 +5,8 @@ class operation {
         this.currentNode = null;
         this.injectWindow = null;
         this._id = null;
-        this._className = null;
-        this.message = {
-            "className": null,
-            "idName": null 
-        },
+        this._classList = null;
+        this._url = window.location.href;
         this.handler = this.handler.bind(this);
     }
 
@@ -27,8 +24,8 @@ class operation {
                 break;
             case "click":
                 if(!this.judgeIfOnInjectWindow(e.clientX, e.clientY)) {
-                    this._className = e.target.classList || null;
-                    this._id = e.target.id || null;
+                    this._classList = e.target.classList || null;
+                    this._id = e.target.getAttribute("id") || null;
                     this.option();
                     e.preventDefault();
                 }
@@ -111,10 +108,63 @@ class operation {
                 <li>爬取该元素</li>\
                 <li>取消该操作</li>\
             </ul>\
+            <div class='displayList'>\
+            </div>\
         ";
-        console.log(this.injectWindow.querySelector(".mainContainer").innerHTML);
         this.injectWindow.querySelector(".mainContainer").innerHTML = node;
-        console.log(this.injectWindow.querySelector(".mainContainer").innerHTML);
+        let table = document.createElement("table");
+        table.insertRow(0);
+        table.insertRow(1);
+        table.rows[0].insertCell(0);
+        table.rows[0].cells[0].appendChild(document.createTextNode("ClassName"));
+        table.rows[1].insertCell(0);
+        table.rows[1].cells[0].appendChild(document.createTextNode("IdName"));
+        table.rows[0].insertCell(1);
+        table.rows[0].cells[1].appendChild(document.createTextNode(this._classList));
+        table.rows[1].insertCell(1);
+        table.rows[1].cells[1].appendChild(document.createTextNode(this._id));
+        this.injectWindow.querySelector(".displayList").appendChild(table);
+
+        let liArray = this.injectWindow.querySelectorAll("li");
+        liArray[0].onclick = () => {
+            chrome.runtime.sendMessage({"url": this._url, "classList": this._classList, "idName": this._id}, function(response) {
+                // chrome.notifications.create(null, {
+                //     type: 'basic',
+                //     iconUrl: 'app/images/logo_v2_qkteam.png',
+                //     title: '温馨提示',
+                //     message: '已经开始为您爬取数据'
+                // });
+            });
+        }
+        liArray[1].onclick = () => {
+            this.injectWindow.querySelector(".mainContainer").innerHTML = "\
+                <p>请选择页面元素</p>\
+            ";
+        }
+    }
+
+    findAllChild(node, stack) {
+        if(node != undefined) {
+            if(node.innerText) {
+                stack.push(node.innerText);
+            }
+            for(let i = 0; i < node.childNodes.length; i++) {
+                this.findAllChild(node.children[i], stack);
+            }
+        }
+    }
+
+    preventReload(order) {
+        if(order == "open") {
+            window.onbeforeunload = () => {
+                return false;
+            }
+        }
+        else {
+            window.onbeforeunload = () => {
+                return true;
+            }
+        }
     }
 }
 
@@ -126,8 +176,11 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendSponse) {
         operator.injectWindowInit();
         operator.injectWindowMove();
         operator.addListener();
+        operator.preventReload("open");
     }
     else {
         operator.removeListener();
+        location.reload();
+        operator.preventReload("close");
     }
 });

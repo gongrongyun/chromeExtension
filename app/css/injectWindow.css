@@ -29,12 +29,30 @@
     color: white;
 }
 
-.injectWindow>.mainContainer>ul {
-    font-size: 15px;
+.injectWindow>.mainContainer>ul>li {
+    font-size: 14px;
     color: rgb(44, 110, 172);
     cursor: pointer;
 }
 
 .injectWindow>.mainContainer>ul>li:hover {
     color: rgb(67, 195, 238);
+}
+
+.injectWindow>.mainContainer>.displayList {
+    margin-top: 20px; 
+    overflow: scroll;
+    height: 100px;
+    font-size: 14px;
+}
+
+.injectWindow>.mainContainer>.displayList::-webkit-scrollbar {
+    display: none;
+}
+
+.injectWindow>.mainContainer>.displayList>th, td{
+    border: 1px solid green;
+    min-width: 50px;
+    max-height: 20px;
+    color: green;
 }
