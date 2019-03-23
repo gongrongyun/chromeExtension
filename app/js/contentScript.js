@@ -1,4 +1,5 @@
 class operation {
+
     constructor(){
         this.orginColor = "";
         this.currentNode = null;
@@ -8,7 +9,8 @@ class operation {
         this.message = {
             "className": null,
             "idName": null 
-        }
+        },
+        this.handler = this.handler.bind(this);
     }
 
     handler(e) {
@@ -16,26 +18,31 @@ class operation {
             case "mouseover":
                 this.currentNode = e.target;
                 this.orginColor = this.currentNode.style.backgroundColor;
-                this.currentNode.style.backgroundColor = "lightblue";
+                if(!this.judgeIfOnInjectWindow(e.clientX, e.clientY)) {
+                    this.currentNode.style.backgroundColor = "lightblue";
+                }
                 break;
             case "mouseout":
                 this.currentNode.style.backgroundColor = this.orginColor;
                 break;
             case "click":
-                this._className = e.target.classList || null;
-                this._id = e.target.id || null;
+                if(!this.judgeIfOnInjectWindow(e.clientX, e.clientY)) {
+                    this._className = e.target.classList || null;
+                    this._id = e.target.id || null;
+                    this.option();
+                    e.preventDefault();
+                }
                 break;
         }
     }
 
     judgeIfOnInjectWindow(x, y) {
         const rect = this.injectWindow.getBoundingClientRect();
-        if((x < rect.left || x > rect.right) && (y < rect.top || y > rect.bottom)) {
+        if((x < rect.left || x > rect.right) || (y < rect.top || y > rect.bottom)) {
             return false;
         }
         return true;
     }
-    
 
     addListener() {
         document.addEventListener("mouseover", this.handler);
@@ -46,6 +53,7 @@ class operation {
     removeListener() {
         document.removeEventListener("mouseover", this.handler);
         document.removeEventListener("mouseout", this.handler);
+        document.removeEventListener("click", this.handler);
     }
 
     injectWindowInit() {
@@ -53,8 +61,8 @@ class operation {
         this.injectWindow.id = "injectWindow";
         this.injectWindow.classList.add("injectWindow");
         this.injectWindow.innerHTML = "\
-            <div class='dragBar'></div>\
-            <div class='mainContainer'></div>\
+            <div class='dragBar'>Prompt</div>\
+            <div class='mainContainer'><p>请选择页面元素</p></div>\
         ";
         document.body.insertBefore(this.injectWindow, document.body.firstChild);
     }
@@ -63,6 +71,11 @@ class operation {
         let isdragging = false;
         this.injectWindow.children[0].onmousedown = (e) => {
             isdragging = true;
+            if(isdragging) {
+                document.onmousewheel = () => {
+                    return false;
+                }
+            }
             let preX, preY;
             const rect = this.injectWindow.getBoundingClientRect();
             if(e.clientX <= document.body.clientWidth && e.clientY <= document.body.clientHeight) {
@@ -82,11 +95,26 @@ class operation {
         };
         this.injectWindow.onmouseup = () => {
             isdragging = false;
+            if(isdragging == false) {
+                document.onmousewheel = () => {
+                    return true;
+                }
+            }
         }
     }
 
-    resizeOfInjectWindow() {
-
+    option() {
+        let node = "\
+            <p>您选中了该元素，您是想:</p>\
+            <br>\
+            <ul>\
+                <li>爬取该元素</li>\
+                <li>取消该操作</li>\
+            </ul>\
+        ";
+        console.log(this.injectWindow.querySelector(".mainContainer").innerHTML);
+        this.injectWindow.querySelector(".mainContainer").innerHTML = node;
+        console.log(this.injectWindow.querySelector(".mainContainer").innerHTML);
     }
 }
 
@@ -95,9 +123,9 @@ const operator = new operation();
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendSponse) {
     if(request == true) {
-        operator.addListener();
         operator.injectWindowInit();
         operator.injectWindowMove();
+        operator.addListener();
     }
     else {
         operator.removeListener();
