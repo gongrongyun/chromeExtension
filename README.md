@@ -1,2 +1,2 @@
 # chromeExtension
-you can use it  to get all  message on web
+you can use it  to get message you want on web
