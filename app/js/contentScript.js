@@ -111,29 +111,25 @@ class operation {
             <div class='displayList'>\
             </div>\
         ";
+        let textStack = [];
+        let tempText = "";
         this.injectWindow.querySelector(".mainContainer").innerHTML = node;
-        let table = document.createElement("table");
-        table.insertRow(0);
-        table.insertRow(1);
-        table.rows[0].insertCell(0);
-        table.rows[0].cells[0].appendChild(document.createTextNode("ClassName"));
-        table.rows[1].insertCell(0);
-        table.rows[1].cells[0].appendChild(document.createTextNode("IdName"));
-        table.rows[0].insertCell(1);
-        table.rows[0].cells[1].appendChild(document.createTextNode(this._classList));
-        table.rows[1].insertCell(1);
-        table.rows[1].cells[1].appendChild(document.createTextNode(this._id));
-        this.injectWindow.querySelector(".displayList").appendChild(table);
+        textStack = this.currentNode.innerText.split("\n");
+        
+        let ul = document.createElement("ul");
+        textStack = textStack.map((elememt) => (`<li>字段· ${elememt}</li><br>`)).join("\n");
+        this.currentNode.querySelectorAll("a").forEach((elememt) => {
+            if(elememt.href) {
+                tempText +=`<li>链接· ${elememt.href}</li><br>`;
+            }
+        });
+        ul.innerHTML = textStack + tempText;
+        this.injectWindow.querySelector(".displayList").appendChild(ul);
 
         let liArray = this.injectWindow.querySelectorAll("li");
         liArray[0].onclick = () => {
             chrome.runtime.sendMessage({"url": this._url, "classList": this._classList, "idName": this._id}, function(response) {
-                // chrome.notifications.create(null, {
-                //     type: 'basic',
-                //     iconUrl: 'app/images/logo_v2_qkteam.png',
-                //     title: '温馨提示',
-                //     message: '已经开始为您爬取数据'
-                // });
+                // do something
             });
         }
         liArray[1].onclick = () => {
