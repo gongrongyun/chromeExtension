@@ -28,11 +28,6 @@
         }
     ],
     "options_page": "app/html/options.html",
-    "options_ui": 
-    {
-        "page": "app/html/options.html",
-        "chrome_style": true
-    },
     "browser_action":
     {
         "default_icon": "app/images/logo_v2_qkteam.png",
