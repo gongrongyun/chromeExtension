@@ -5,7 +5,7 @@
     background-color: rgb(247, 135, 16);
     border-radius: 5px;
     box-shadow: 2px  2px 10px grey;
-    z-index: 1000;
+    z-index: 100000;
     opacity: 1;
 }
 
@@ -27,6 +27,7 @@
     height: 275px;
     padding: 20px;
     color: white;
+    margin: 0;
 }
 
 .injectWindow>.mainContainer>ul>li {

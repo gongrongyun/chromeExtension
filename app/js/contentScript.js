@@ -3,34 +3,99 @@ class operation {
     constructor(){
         this.orginColor = "";
         this.currentNode = null;
+        this.childColor = null;
         this.injectWindow = null;
         this._id = null;
         this._classList = null;
+        this._tagName = null;
+        this.childLocation = [];
         this._url = window.location.href;
         this.handler = this.handler.bind(this);
+        this.status = "browsing";
+        this.nodeArray = [];
+        this.result = ''; //递归寻找子元素相对于父元素的位置
+    }
+    httpRequest() {
+        const xhr  = new XMLHttpRequest();
+        xhr.open()
+        xhr.setRequestHeader()
+        xhr.send()
+        let data = {
+            "name": "gong",
+            "age": 10
+        }
+        let str = JSON.stringify(data)
+        let jsom = JSON.parse(str)
     }
 
     handler(e) {
         switch(e.type) {
             case "mouseover":
-                this.currentNode = e.target;
-                this.orginColor = this.currentNode.style.backgroundColor;
-                if(!this.judgeIfOnInjectWindow(e.clientX, e.clientY)) {
-                    this.currentNode.style.backgroundColor = "lightblue";
+                if(this.status == "browsing") {
+                    this.currentNode = e.target;
+                    this.orginColor = this.currentNode.style.backgroundColor;
+                    if(!this.judgeIfOnInjectWindow(e.clientX, e.clientY)) {
+                        this.currentNode.style.backgroundColor = "lightblue";
+                    }
+                }
+                else {
+                    if(this.hasParent(e.target, this.currentNode) && e.target != this.currentNode) {
+                        this.childColor = e.target.style.backgroundColor;
+                        e.target.style.backgroundColor = "lightgreen";
+                    }
                 }
                 break;
             case "mouseout":
-                this.currentNode.style.backgroundColor = this.orginColor;
+                if(this.status == "browsing") {
+                    this.currentNode.style.backgroundColor = this.orginColor;
+                }
+                else {
+                    if(e.target != this.currentNode) {
+                        e.target.style.backgroundColor = this.childColor;
+                    }
+                }
                 break;
             case "click":
                 if(!this.judgeIfOnInjectWindow(e.clientX, e.clientY)) {
-                    this._classList = e.target.classList || null;
-                    this._id = e.target.getAttribute("id") || null;
-                    this.option();
+                    if(this.status == "browsing") {
+                        this.status = "selecting";
+                        this._classList = e.target.classList || null;
+                        this._id = e.target.getAttribute("id") || null;
+                        this._tagName = e.target.getAttribute("tagName") || null;
+                        this.option();
+                    }
+                    else {
+                        e.target.style.border = "1px solid #ff0000";
+                        this.nodeArray.push({"nodeName":e.target, "styleBorder":e.target.getAttribute("border")});
+                        this.childLocation.push(this.locat(e.target, this.currentNode));
+                    }
                     e.preventDefault();
                 }
                 break;
         }
+    }
+
+    locat(child, parent) {
+        // for(let i = 0; i < parent.childNodes; i++) {
+        //     if(child == parent.children[i]) {
+        //         result += `${i} `;
+        //         return result;
+        //     }
+        //     else {
+        //         locat(child, parent.children[i]);
+        //         result -= `${i} `;
+        //     }
+        // }
+    }
+
+    hasParent(node, parent) {
+        while(node.parentNode != undefined) {
+            if(node.parentNode === parent) {
+                return true;
+            }
+            node = node.parentNode;
+        }
+        return false;
     }
 
     judgeIfOnInjectWindow(x, y) {
@@ -102,10 +167,10 @@ class operation {
 
     option() {
         let node = "\
-            <p>您选中了该元素，您是想:</p>\
+            <p>您选中了该元素，请选择想爬取的子元素</p>\
             <br>\
             <ul>\
-                <li>爬取该元素</li>\
+                <li>开始爬取</li>\
                 <li>取消该操作</li>\
             </ul>\
             <div class='displayList'>\
@@ -133,6 +198,11 @@ class operation {
             });
         }
         liArray[1].onclick = () => {
+            this.status = "browsing";
+            this.currentNode.style.backgroundColor = this.orginColor;
+            for(node of this.nodeArray) {
+                node.nodeName.style.border = node.styleBorder;
+            }
             this.injectWindow.querySelector(".mainContainer").innerHTML = "\
                 <p>请选择页面元素</p>\
             ";
