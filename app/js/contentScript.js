@@ -8,24 +8,12 @@ class operation {
         this._id = null;
         this._classList = null;
         this._tagName = null;
-        this.childLocation = [];
+        this.childLocation = []; //发送后端定位目标元素
         this._url = window.location.href;
         this.handler = this.handler.bind(this);
         this.status = "browsing";
         this.nodeArray = [];
         this.result = ''; //递归寻找子元素相对于父元素的位置
-    }
-    httpRequest() {
-        const xhr  = new XMLHttpRequest();
-        xhr.open()
-        xhr.setRequestHeader()
-        xhr.send()
-        let data = {
-            "name": "gong",
-            "age": 10
-        }
-        let str = JSON.stringify(data)
-        let jsom = JSON.parse(str)
     }
 
     handler(e) {
@@ -65,9 +53,11 @@ class operation {
                         this.option();
                     }
                     else {
+                        this.displaySelectText(e.target);
                         e.target.style.border = "1px solid #ff0000";
                         this.nodeArray.push({"nodeName":e.target, "styleBorder":e.target.getAttribute("border")});
-                        this.childLocation.push(this.locat(e.target, this.currentNode));
+                        this.result = "";
+                        this.childLocation.push({className:this.locat(e.target, this.currentNode), index:this.index(e.target)});
                     }
                     e.preventDefault();
                 }
@@ -75,17 +65,29 @@ class operation {
         }
     }
 
+    index(node) {
+        const parent = node.parentNode;
+        for(let index = 0; index < parent.children.length; index++) {
+            if(node === parent.children[index]) {
+                return index;
+            }
+        }
+    }
+
     locat(child, parent) {
-        // for(let i = 0; i < parent.childNodes; i++) {
-        //     if(child == parent.children[i]) {
-        //         result += `${i} `;
-        //         return result;
-        //     }
-        //     else {
-        //         locat(child, parent.children[i]);
-        //         result -= `${i} `;
-        //     }
-        // }
+        for(let i = 0; i < parent.children.length; i++) {
+            const tempResult = this.result;
+            this.result += `${parent.children[i].className || parent.children[i].tagName}\\`;
+            if(child === parent.children[i]) {
+                return this.result;
+            }
+            else {
+                if(this.locat(child, parent.children[i]) != undefined) {
+                    return this.result;
+                }
+                this.result = tempResult;
+            }
+        }
     }
 
     hasParent(node, parent) {
@@ -165,6 +167,13 @@ class operation {
         }
     }
 
+    displaySelectText(node) {
+        const ul = this.injectWindow.querySelector(".displaytext");
+        let temptext = node.innerText.split("\n");
+        temptext = temptext.map((elememt) => (`<li>字段· ${elememt}</li><br>`)).join("");
+        ul.innerHTML += temptext;
+    }
+
     option() {
         let node = "\
             <p>您选中了该元素，请选择想爬取的子元素</p>\
@@ -174,31 +183,26 @@ class operation {
                 <li>取消该操作</li>\
             </ul>\
             <div class='displayList'>\
+                <ul class='displaytext'></ul>\
             </div>\
         ";
-        let textStack = [];
-        let tempText = "";
         this.injectWindow.querySelector(".mainContainer").innerHTML = node;
-        textStack = this.currentNode.innerText.split("\n");
-        
-        let ul = document.createElement("ul");
-        textStack = textStack.map((elememt) => (`<li>字段· ${elememt}</li><br>`)).join("\n");
-        this.currentNode.querySelectorAll("a").forEach((elememt) => {
-            if(elememt.href) {
-                tempText +=`<li>链接· ${elememt.href}</li><br>`;
-            }
-        });
-        ul.innerHTML = textStack + tempText;
-        this.injectWindow.querySelector(".displayList").appendChild(ul);
 
         let liArray = this.injectWindow.querySelectorAll("li");
         liArray[0].onclick = () => {
-            chrome.runtime.sendMessage({"url": this._url, "classList": this._classList, "idName": this._id}, function(response) {
+            const data = {
+                url: this._url,
+                classList: this._classList,
+                id: this._id,
+                childPosition: this.childLocation
+            }
+            chrome.runtime.sendMessage(data, function(response) {
                 // do something
             });
         }
         liArray[1].onclick = () => {
             this.status = "browsing";
+            this.childLocation = [];
             this.currentNode.style.backgroundColor = this.orginColor;
             for(node of this.nodeArray) {
                 node.nodeName.style.border = node.styleBorder;
