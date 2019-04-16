@@ -61,7 +61,12 @@ function end() {
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     //将数据发往后端
-    // httpRequest(url, request);
+    // httpRequest(url, request)
+    //     .then(function() {
+    //         const fso = new ActiveXObject("Scripting.FileSystemObject");
+    //         let file = fso.createtextfile("./result.txt", true); 
+    //     });
+    console.log(request);
     chrome.notifications.create(null, {
         type: 'basic',
         iconUrl: 'app/images/logo_v2_qkteam.png',

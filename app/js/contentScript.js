@@ -5,15 +5,17 @@ class operation {
         this.currentNode = null;
         this.childColor = null;
         this.injectWindow = null;
-        this._id = null;
-        this._classList = null;
-        this._tagName = null;
+        this._id = '';
+        this._classList = '';
+        this._tagName = '';
         this.childLocation = []; //发送后端定位目标元素
         this._url = window.location.href;
         this.handler = this.handler.bind(this);
         this.status = "browsing";
         this.nodeArray = [];
         this.result = ''; //递归寻找子元素相对于父元素的位置
+        this.nextUrl = '';
+        this.selected = false;
     }
 
     handler(e) {
@@ -53,6 +55,9 @@ class operation {
                         this.option();
                     }
                     else {
+                        if(this.selected) {
+                            this.nextUrl = e.target.classList;
+                        }
                         this.displaySelectText(e.target);
                         e.target.style.border = "1px solid #ff0000";
                         this.nodeArray.push({"nodeName":e.target, "styleBorder":e.target.getAttribute("border")});
@@ -179,7 +184,7 @@ class operation {
             <p>您选中了该元素，请选择想爬取的子元素</p>\
             <br>\
             <ul>\
-                <li>开始爬取</li>\
+                <li>选取完毕</li>\
                 <li>取消该操作</li>\
             </ul>\
             <div class='displayList'>\
@@ -190,19 +195,11 @@ class operation {
 
         let liArray = this.injectWindow.querySelectorAll("li");
         liArray[0].onclick = () => {
-            const data = {
-                url: this._url,
-                classList: this._classList,
-                id: this._id,
-                childPosition: this.childLocation
-            }
-            chrome.runtime.sendMessage(data, function(response) {
-                // do something
-            });
+            this.getNextUrlClass(liArray[0]);
         }
         liArray[1].onclick = () => {
             this.status = "browsing";
-            this.childLocation = [];
+            this.selected = false;
             this.currentNode.style.backgroundColor = this.orginColor;
             for(node of this.nodeArray) {
                 node.nodeName.style.border = node.styleBorder;
@@ -210,6 +207,33 @@ class operation {
             this.injectWindow.querySelector(".mainContainer").innerHTML = "\
                 <p>请选择页面元素</p>\
             ";
+            this.clearAll();
+        }
+    }
+
+    clearAll() {
+        this.childLocation = [];
+        this.nextUrl = '';
+        this._id = '';
+        this._classList = '';
+        this._tagName = '';
+    }
+
+    getNextUrlClass(node) {
+        node.innerText = '点击下一页后点此开始爬取';
+        this.selected = true;
+        node.onclick = () => {
+            const data = {
+                url: this._url,
+                classList: this._classList,
+                id: this._id,
+                nextUrl: this.nextUrl,
+                childPosition: this.childLocation
+            }
+            chrome.runtime.sendMessage(data, function(response) {
+                // do something
+                this.selected = false;
+            });
         }
     }
 
