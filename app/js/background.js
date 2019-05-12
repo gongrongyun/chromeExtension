@@ -10,14 +10,13 @@ function httpRequest(url, data) {
             if(this.status === 200) {
                 resolve(this.response);
             } else {
-                reject(new Error(this.statusText));
+                reject(new Error(this.status));
             }
         }
         const xhr = new XMLHttpRequest();
         xhr.open("POST", url);
         xhr.onreadystatechange = handler;
         xhr.send(JSON.stringify(data));
-
     });
 
     return promise;
@@ -60,12 +59,12 @@ function end() {
 }
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    //将数据发往后端
-    // httpRequest(url, request)
-    //     .then(function() {
-    //         const fso = new ActiveXObject("Scripting.FileSystemObject");
-    //         let file = fso.createtextfile("./result.txt", true); 
-    //     });
+    httpRequest('http://localhost:3000', request)
+        .then(function(text) {
+            console.log(text);
+        }, function(e) {
+            console.log(e)
+        });
     console.log(request);
     chrome.notifications.create(null, {
         type: 'basic',
