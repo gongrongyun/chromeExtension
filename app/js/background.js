@@ -15,6 +15,7 @@ function httpRequest(url, data) {
         }
         const xhr = new XMLHttpRequest();
         xhr.open("POST", url);
+        xhr.setRequestHeader("Content-Type", "application/json");
         xhr.onreadystatechange = handler;
         xhr.send(JSON.stringify(data));
     });
