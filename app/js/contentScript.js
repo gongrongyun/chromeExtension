@@ -265,7 +265,7 @@ class operation {
 const operator = new operation();
 
 
-chrome.runtime.onMessage.addListener(function(request, sender, sendSponse) {
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if(request == true) {
         operator.injectWindowInit();
         operator.injectWindowMove();
@@ -277,4 +277,5 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendSponse) {
         location.reload();
         operator.preventReload("close");
     }
+    sendResponse();
 });

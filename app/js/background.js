@@ -72,4 +72,5 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         title: '温馨提示',
         message: '已经开始为您爬取数据'
     });
+    sendResponse();
 })
