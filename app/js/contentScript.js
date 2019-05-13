@@ -82,7 +82,13 @@ class operation {
     locat(child, parent) {
         for(let i = 0; i < parent.children.length; i++) {
             const tempResult = this.result;
-            this.result += `${parent.children[i].className || parent.children[i].tagName}\\`;
+            if(parent.children[i].className) {
+                this.result += `.${parent.children[i].className} > `;
+            }
+            else {
+                this.result += `${parent.children[i].tagName.toLowerCase()} > `;
+            }
+            // this.result += `.${parent.children[i].className || parent.children[i].tagName.toLowerCase()} > `;
             if(child === parent.children[i]) {
                 return this.result;
             }
